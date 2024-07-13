@@ -167,7 +167,7 @@ public:
     }
 
 private:
-    array<Joystick, 4>& joysticks;
+    std::array<Joystick, 4>& joysticks;
     int deadzone;
     unsigned long lastActivityTime;
 
@@ -230,6 +230,13 @@ static const uint8_t _hidReportDescriptor[] PROGMEM = {
 };
 
 Adafruit_USBD_HID usb_hid;
+
+std::array<Joystick, 4> joysticks = {
+    Joystick(16, 18),
+    Joystick(3, 5),
+    Joystick(11, 12),
+    Joystick(7, 9)
+};
 
 JoystickArray joystickArray(joysticks);
 int16_t speed = 40;
