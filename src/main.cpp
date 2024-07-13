@@ -1,5 +1,5 @@
-#include <ArduinoJson.h>
 #include <Adafruit_TinyUSB.h>
+#include <USB.h>
 using namespace std;
 
 #define INITIAL_DEADZONE 10
@@ -235,7 +235,10 @@ JoystickArray joystickArray(joysticks);
 int16_t speed = 40;
 Motion lastMotion;
 
-void setupUSBHID() {
+void setup() {
+    Serial.begin(115200);
+    delay(7000);
+
     USB.PID(0xc631);
     USB.VID(0x256f);
     USB.begin();
@@ -245,12 +248,8 @@ void setupUSBHID() {
     usb_hid.setPollInterval(2);
     usb_hid.setReportDescriptor(_hidReportDescriptor, sizeof(_hidReportDescriptor));
     usb_hid.begin();
-    while (!TinyUSBDevice.mounted()) delay(1);
-}
 
-void setup() {
-    Serial.begin(115200);
-    setupUSBHID();
+    while (!TinyUSBDevice.mounted()) delay(1);
 
     for (auto& joystick : joysticks) {
         joystick.readData();
@@ -273,15 +272,19 @@ bool motionChanged(const Motion& newMotion, const Motion& lastMotion) {
 }
 
 void loop() {
-    if (!usb_hid.ready()) return;
-
+    if (!usb_hid.ready()) {
+        Serial.println("USB not ready!");
+    delay(20000);
+        return;
+    }
     Motion motion = joystickArray.calculateMotion();
     motion.applySpeed(speed);
+    motion.log();
 
     if (motionChanged(motion, lastMotion)) {
         sendCommand(motion);
         lastMotion = motion;
     }
 
-    delay(20);
+    delay(20000);
 }
